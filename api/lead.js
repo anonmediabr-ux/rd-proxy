@@ -6,24 +6,23 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   try {
-    const response = await fetch("https://crm.rdstation.com/api/v1/deals", {
+    const { nome, email, telefone, empresa, faturamento, nicho, segmento } = req.body;
+
+    const response = await fetch(`https://crm.rdstation.com/api/v1/deals?token=69caff506e1ed50013a5b86d`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "token": "69caff506e1ed50013a5b86d"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         deal: {
-          name: req.body.nome,
-          contacts: [{
-            name: req.body.nome,
-            emails: [{ email: req.body.email }],
-            phones: [{ phone: req.body.telefone }]
+          name: nome,
+          contacts_attributes: [{
+            name: nome,
+            emails: [{ email }],
+            phones: [{ phone: telefone }]
           }],
-          deal_custom_fields: [
-            { custom_field_id: "segmento", value: req.body.segmento },
-            { custom_field_id: "faturamento", value: req.body.faturamento },
-            { custom_field_id: "nicho", value: req.body.nicho }
+          deal_custom_fields_attributes: [
+            { value: segmento || "" },
+            { value: faturamento || "" },
+            { value: nicho || "" }
           ]
         }
       })
