@@ -6,9 +6,9 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   try {
-    const { nome, email, telefone, empresa, faturamento, nicho, segmento } = req.body;
+    const { nome, email, telefone, faturamento, nicho, segmento } = req.body;
 
-    // 1. Cria o contato primeiro
+    // 1. Cria contato
     const contatoRes = await fetch(`https://crm.rdstation.com/api/v1/contacts?token=69caff506e1ed50013a5b86d`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const contato = await contatoRes.json();
     const contatoId = contato?.contact?._id || contato?._id;
 
-    // 2. Cria o deal com API v1 mas custom_fields como objeto
+    // 2. Cria deal
     const dealRes = await fetch(`https://crm.rdstation.com/api/v1/deals?token=69caff506e1ed50013a5b86d`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -34,17 +34,17 @@ export default async function handler(req, res) {
           deal_stage_id: "6734f0e858b0a0001e9f4d6a",
           contacts_ids: contatoId ? [contatoId] : [],
           deal_custom_fields_attributes: [
-            { _id: "673cdc1cac052c0013cc821a", value: faturamento || "" },
-            { _id: "689933711797fb00177b3cd1", value: nicho || "" },
-            { _id: "67460b890127e40013c0bcc7", value: segmento || "Gastronomia" },
-            { _id: "67460dbb096b0300132ae559", value: "Proprietário" }
+            { custom_field_id: "673cdc1cac052c0013cc821a", value: faturamento || "" },
+            { custom_field_id: "689933711797fb00177b3cd1", value: nicho || "" },
+            { custom_field_id: "67460b890127e40013c0bcc7", value: segmento || "Gastronomia" },
+            { custom_field_id: "67460dbb096b0300132ae559", value: "Proprietário" }
           ]
         }
       })
     });
 
     const deal = await dealRes.json();
-    return res.status(200).json({ contato, deal });
+    return res.status(200).json({ contatoId, deal });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
