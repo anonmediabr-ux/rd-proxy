@@ -18,8 +18,3 @@ export default async function handler(req, res) {
   // Mostra os tokens na tela
   return res.status(200).json(data);
 }
-```
-
-Depois do deploy, acessa essa URL no browser pra autorizar:
-```
-https://api.rd.services/auth/dialog?client_id=56c1973f-7ddf-49f2-96f1-528290448dbb&redirect_uri=https://rd-proxy.vercel.app/api/callback
