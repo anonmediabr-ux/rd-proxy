@@ -33,7 +33,7 @@ export default async function handler(req, res) {
           deal_pipeline_id: "6734f0e858b0a0001e9f4d68",
           deal_stage_id: "6734f0e858b0a0001e9f4d6a",
           contacts_ids: contatoId ? [contatoId] : [],
-          deal_custom_fields_attributes: [
+          deal_custom_fields: [
             { custom_field_id: "673cdc1cac052c0013cc821a", value: faturamento || "" },
             { custom_field_id: "689933711797fb00177b3cd1", value: nicho || "" },
             { custom_field_id: "67460b890127e40013c0bcc7", value: segmento || "Gastronomia" },
