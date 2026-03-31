@@ -8,7 +8,23 @@ export default async function handler(req, res) {
   try {
     const { nome, email, telefone, empresa, faturamento, nicho, segmento } = req.body;
 
-    const response = await fetch(`https://crm.rdstation.com/api/v1/deals?token=69caff506e1ed50013a5b86d`, {
+    // 1. Cria o contato primeiro
+    const contatoRes = await fetch(`https://crm.rdstation.com/api/v1/contacts?token=69caff506e1ed50013a5b86d`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contact: {
+          name: nome,
+          emails: [{ email }],
+          phones: [{ phone: telefone }]
+        }
+      })
+    });
+    const contato = await contatoRes.json();
+    const contatoId = contato?.contact?._id || contato?._id;
+
+    // 2. Cria o deal com API v1 mas custom_fields como objeto
+    const dealRes = await fetch(`https://crm.rdstation.com/api/v1/deals?token=69caff506e1ed50013a5b86d`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -16,23 +32,19 @@ export default async function handler(req, res) {
           name: nome,
           deal_pipeline_id: "6734f0e858b0a0001e9f4d68",
           deal_stage_id: "6734f0e858b0a0001e9f4d6a",
-          contacts_attributes: [{
-            name: nome,
-            emails: [{ email }],
-            phones: [{ phone: telefone }]
-          }],
+          contacts_ids: contatoId ? [contatoId] : [],
           deal_custom_fields_attributes: [
-            { custom_field_id: "673cdc1cac052c0013cc821a", value: faturamento || "" },
-            { custom_field_id: "689933711797fb00177b3cd1", value: nicho || "" },
-            { custom_field_id: "67460b890127e40013c0bcc7", value: segmento || "Gastronomia" },
-            { custom_field_id: "67460dbb096b0300132ae559", value: "Proprietário" }
+            { _id: "673cdc1cac052c0013cc821a", value: faturamento || "" },
+            { _id: "689933711797fb00177b3cd1", value: nicho || "" },
+            { _id: "67460b890127e40013c0bcc7", value: segmento || "Gastronomia" },
+            { _id: "67460dbb096b0300132ae559", value: "Proprietário" }
           ]
         }
       })
     });
 
-    const data = await response.json();
-    return res.status(200).json(data);
+    const deal = await dealRes.json();
+    return res.status(200).json({ contato, deal });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
