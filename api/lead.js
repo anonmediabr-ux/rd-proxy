@@ -20,7 +20,13 @@ export default async function handler(req, res) {
             name: nome,
             emails: [{ email }],
             phones: [{ phone: telefone }]
-          }]
+          }],
+          deal_custom_fields_attributes: [
+            { custom_field_id: "673cdc1cac052c0013cc821a", value: faturamento || "" },
+            { custom_field_id: "689933711797fb00177b3cd1", value: nicho || "" },
+            { custom_field_id: "67460b890127e40013c0bcc7", value: segmento || "Gastronomia" },
+            { custom_field_id: "67460dbb096b0300132ae559", value: "Proprietário" }
+          ]
         }
       })
     });
