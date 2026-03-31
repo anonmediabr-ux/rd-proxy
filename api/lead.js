@@ -1,4 +1,4 @@
-const ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS5yZC5zZXJ2aWNlcyIsInN1YiI6IlJDR2RWQ0xVbDF1cGdoRjdkWXM5a1AtS3V6R2tfLTNVUVFwNUdIaTdkd01AY2xpZW50cyIsImF1ZCI6Imh0dHBzOi8vYXBwLnJkc3RhdGlvbi5jb20uYnIvYXBpL3YyLyIsImFwcF9uYW1lIjoiQW5vbk1lZGlhIExQIEludGVncmF0aW9uIiwiZXhwIjoxNzc1MDA1MzIzLCJpYXQiOjE3NzQ5MTg5MjMsInNjb3BlIjoiIn0.PwIlfRonYGfN3AAShVej4ttsCFPmnHB8IXEBsVvzwr-YYlBYvN6ldlWR5AWBEWS3ReKaUsnIs6jNi0R6jNXm26HSqHckOnk_mbajk5jh-TF_veE5TXzy3eeQg1JMW2uoILPPLahOD368kPujpoUgeBuZ0WRhqeoB6E47CJ-nk_gprfgYHCjeut97V2D85cQlIrWDi5ypAnkkVB71QChkLuQpcGyIAbxskt0u0X9s8D7ybZ6XYfO2_L_l7lPy3mSMYG9rrmV5fFG4z6vbQs7_Hb9slCJuA0qMVkC0HBhdEFofWtpKpoDvfl7-vZXDtijeSkxy0cf86jOK2GVMign-Rg";
+const ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS5yZC5zZXJ2aWNlcyIsInN1YiI6IlJDR2RWQ0xVbDF1cGdoRjdkWXM5a1AtS3V6R2tfLTNVUVFwNUdIaTdkd01AY2xpZW50cyIsImF1ZCI6Imh0dHBzOi8vYXBwLnJkc3RhdGlvbi5jb20uYnIvYXBpL3YyLyIsImFwcF9uYW1lIjoiQW5vbU1lZGlhIExQIEludGVncmF0aW9uIiwiZXhwIjoxNzc1MDA1MzIzLCJpYXQiOjE3NzQ5MTg5MjMsInNjb3BlIjoiIn0.PwIlfRonYGfN3AAShVej4ttsCFPmnHB8IXEBsVvzwr-YYlBYvN6ldlWR5AWBEWS3ReKaUsnIs6jNi0R6jNXm26HSqHckOnk_mbajk5jh-TF_veE5TXzy3eeQg1JMW2uoILPPLahOD368kPujpoUgeBuZ0WRhqeoB6E47CJ-nk_gprfgYHCjeut97V2D85cQlIrWDi5ypAnkkVB71QChkLuQpcGyIAbxskt0u0X9s8D7ybZ6XYfO2_L_l7lPy3mSMYG9rrmV5fFG4z6vbQs7_Hb9slCJuA0qMVkC0HBhdEFofWtpKpoDvfl7-vZXDtijeSkxy0cf86jOK2GVMign-Rg";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -10,23 +10,26 @@ export default async function handler(req, res) {
   try {
     const { nome, email, telefone, faturamento, nicho, segmento } = req.body;
 
-    // 1. Cria contato via v1
-    const contatoRes = await fetch(`https://crm.rdstation.com/api/v1/contacts?token=69caff506e1ed50013a5b86d`, {
+    // 1. Cria contato via v2
+    const contatoRes = await fetch("https://api.rd.services/crm/v2/contacts", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${ACCESS_TOKEN}`
+      },
       body: JSON.stringify({
-        contact: {
+        data: {
           name: nome,
-          emails: [{ email }],
-          phones: [{ phone: telefone }]
+          emails: [{ address: email }],
+          phones: [{ number: telefone }]
         }
       })
     });
     const contatoData = await contatoRes.json();
-    const contatoId = contatoData?.contact?._id || contatoData?._id;
+    const contatoId = contatoData?.data?.id;
 
     // 2. Cria deal via v2 com contact_ids
-    const dealRes = await fetch(`https://api.rd.services/crm/v2/deals`, {
+    const dealRes = await fetch("https://api.rd.services/crm/v2/deals", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,7 +52,7 @@ export default async function handler(req, res) {
     });
 
     const deal = await dealRes.json();
-    return res.status(200).json({ contatoId, deal });
+    return res.status(200).json({ contatoId, contatoData, deal });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
