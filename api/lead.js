@@ -14,16 +14,13 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         deal: {
           name: nome,
+          deal_pipeline_id: "6734f0e858b0a0001e9f4d68",
+          deal_stage_id: "6734f0e858b0a0001e9f4d6a",
           contacts_attributes: [{
             name: nome,
             emails: [{ email }],
             phones: [{ phone: telefone }]
-          }],
-          deal_custom_fields_attributes: [
-            { value: segmento || "" },
-            { value: faturamento || "" },
-            { value: nicho || "" }
-          ]
+          }]
         }
       })
     });
