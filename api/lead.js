@@ -44,11 +44,16 @@ export default async function handler(req, res) {
     const deal = await dealRes.json();
     const dealId = deal?._id || deal?.id;
 
-    // 3. Associa contato ao deal
+    // 3. Associa contato ao deal via PUT
     if (contatoId && dealId) {
-      await fetch(`https://crm.rdstation.com/api/v1/deals/${dealId}/contacts/${contatoId}?token=69caff506e1ed50013a5b86d`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
+      await fetch(`https://crm.rdstation.com/api/v1/deals/${dealId}?token=69caff506e1ed50013a5b86d`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deal: {
+            contacts_ids: [contatoId]
+          }
+        })
       });
     }
 
