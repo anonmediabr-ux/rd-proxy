@@ -3,25 +3,20 @@ export default async function handler(req, res) {
 
   if (!code) return res.status(400).json({ error: "Code não encontrado" });
 
-  // Mostra o code na tela sem trocar ainda
-  return res.status(200).send(`
-    <html>
-      <body>
-        <h2>Code recebido!</h2>
-        <p>Cole esse code abaixo e clique em Trocar:</p>
-        <input id="code" value="${code}" style="width:100%;padding:10px" readonly />
-        <br/><br/>
-        <button onclick="trocar()">Trocar por Token</button>
-        <pre id="result"></pre>
-        <script>
-          async function trocar() {
-            const code = document.getElementById('code').value;
-            const res = await fetch('/api/token?code=' + code);
-            const data = await res.json();
-            document.getElementById('result').innerText = JSON.stringify(data, null, 2);
-          }
-        </script>
-      </body>
-    </html>
-  `);
+  try {
+    const response = await fetch("https://api.rd.services/auth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: "56c1973f-7ddf-49f2-96f1-528290448dbb",
+        client_secret: "11a744f13b9d42d8baaad83ea4bc9e4e",
+        code: code
+      })
+    });
+
+    const data = await response.json();
+    return res.status(200).json(data);
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
 }
