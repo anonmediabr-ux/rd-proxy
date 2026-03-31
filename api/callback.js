@@ -3,18 +3,19 @@ export default async function handler(req, res) {
 
   if (!code) return res.status(400).json({ error: "Code não encontrado" });
 
-  const response = await fetch("https://api.rd.services/auth/token", {
+  const params = new URLSearchParams();
+  params.append("client_id", "56c1973f-7ddf-49f2-96f1-528290448dbb");
+  params.append("client_secret", "11a744f13b9d42d8baaad83ea4bc9e4e");
+  params.append("code", code);
+  params.append("redirect_uri", "https://rd-proxy.vercel.app/api/callback");
+  params.append("grant_type", "authorization_code");
+
+  const response = await fetch("https://api.rd.services/oauth2/token", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      client_id: "56c1973f-7ddf-49f2-96f1-528290448dbb",
-      client_secret: "11a744f13b9d42d8baaad83ea4bc9e4e",
-      code,
-    })
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params
   });
 
   const data = await response.json();
-  
-  // Mostra os tokens na tela
   return res.status(200).json(data);
 }
