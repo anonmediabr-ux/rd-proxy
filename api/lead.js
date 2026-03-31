@@ -20,7 +20,8 @@ export default async function handler(req, res) {
         }
       })
     });
-    const contatoData = await contatoRes.json();
+    const contatoText = await contatoRes.text();
+    const contatoData = JSON.parse(contatoText);
     const contatoId = contatoData?.contact?._id || contatoData?._id;
 
     // 2. Cria deal
@@ -41,21 +42,22 @@ export default async function handler(req, res) {
         }
       })
     });
-    const deal = await dealRes.json();
+    const dealText = await dealRes.text();
+    const deal = JSON.parse(dealText);
     const dealId = deal?._id || deal?.id;
 
     // 3. Associa contato ao deal
-    let assoc = null;
+    let assocText = null;
     if (contatoId && dealId) {
       const assocRes = await fetch(`https://crm.rdstation.com/api/v1/deals/${dealId}/contacts?token=69caff506e1ed50013a5b86d`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contact_id: contatoId })
       });
-      assoc = await assocRes.json();
+      assocText = await assocRes.text();
     }
 
-    return res.status(200).json({ contatoId, dealId, assoc });
+    return res.status(200).json({ contatoId, dealId, assocText });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
