@@ -20,8 +20,8 @@ export default async function handler(req, res) {
         }
       })
     });
-    const contato = await contatoRes.json();
-    const contatoId = contato?.contact?._id || contato?._id;
+    const contatoData = await contatoRes.json();
+    const contatoId = contatoData?.contact?._id || contatoData?._id;
 
     // 2. Cria deal
     const dealRes = await fetch(`https://crm.rdstation.com/api/v1/deals?token=69caff506e1ed50013a5b86d`, {
@@ -32,7 +32,6 @@ export default async function handler(req, res) {
           name: nome,
           deal_pipeline_id: "6734f0e858b0a0001e9f4d68",
           deal_stage_id: "6734f0e858b0a0001e9f4d6a",
-          contacts_ids: contatoId ? [contatoId] : [],
           deal_custom_fields: [
             { custom_field_id: "673cdc1cac052c0013cc821a", value: faturamento || "" },
             { custom_field_id: "689933711797fb00177b3cd1", value: nicho || "" },
@@ -42,9 +41,18 @@ export default async function handler(req, res) {
         }
       })
     });
-
     const deal = await dealRes.json();
-    return res.status(200).json({ contatoId, deal });
+    const dealId = deal?._id || deal?.id;
+
+    // 3. Associa contato ao deal
+    if (contatoId && dealId) {
+      await fetch(`https://crm.rdstation.com/api/v1/deals/${dealId}/contacts/${contatoId}?token=69caff506e1ed50013a5b86d`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    return res.status(200).json({ contatoId, dealId, deal });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
